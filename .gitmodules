@@ -1,0 +1,18 @@
+[submodule "externals/irrlicht-sdl"]
+	path = externals/irrlicht-sdl
+	url = https://github.com/okuoku/irrlicht-generic-sdl
+[submodule "externals/sdl"]
+	path = externals/sdl
+	url = https://github.com/spurious/SDL-mirror
+[submodule "externals/angle"]
+	path = externals/angle
+	url = https://github.com/google/angle
+[submodule "sdl2-static-cmake"]
+	path = sdl2-static-cmake
+	url = https://github.com/okuoku/sdl2-static-cmake
+[submodule "angle-static-cmake"]
+	path = angle-static-cmake
+	url = https://github.com/okuoku/angle-static-cmake
+[submodule "irrlicht-cmake"]
+	path = irrlicht-cmake
+	url = https://github.com/okuoku/irrlicht-cmake
