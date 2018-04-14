@@ -1,3 +1,6 @@
+// main.cpp: Based on the original tutorial 02.
+//           See LICENSE file for licensing details
+
 /** Example 002 Quake3Map
 
 This tutorial shows how to load a Quake 3 map into the engine, create a
@@ -13,8 +16,6 @@ and an additional file to be able to ask the user for a driver type using the
 console.
 */
 #include <irrlicht.h>
-#include "driverChoice.h"
-#include "exampleHelper.h"
 
 /*
 As already written in the HelloWorld example, in the Irrlicht Engine everything
@@ -28,37 +29,15 @@ you can also include the namespaces like in the previous example.
 */
 using namespace irr;
 
-/*
-Again, to be able to use the Irrlicht.DLL file, we need to link with the
-Irrlicht.lib. We could set this option in the project settings, but to make it
-easy, we use a pragma comment lib:
-*/
-#ifdef _MSC_VER
-#pragma comment(lib, "Irrlicht.lib")
-#endif
+using namespace gui;
+using namespace core;
 
-/*
-OK, lets start. Again, we use the main() method as start, not the WinMain().
-*/
-int main()
+extern "C" int SDL_main(int ac, char** av)
 {
-	/*
-	Like in the HelloWorld example, we create an IrrlichtDevice with
-	createDevice(). The difference now is that we ask the user to select
-	which video driver to use. The Software device might be
-	too slow to draw a huge Quake 3 map, but just for the fun of it, we make
-	this decision possible, too.
-	*/
-
-	// ask user for driver
-	video::E_DRIVER_TYPE driverType=driverChoiceConsole(true);
-	if (driverType==video::EDT_COUNT)
-		return 1;
-
 	// create device and exit if creation failed
 
 	IrrlichtDevice *device =
-		createDevice(driverType, core::dimension2d<u32>(640, 480));
+		createDevice(video::EDT_BURNINGSVIDEO, core::dimension2d<u32>(640, 480));
 
 	if (device == 0)
 		return 1; // could not create selected driver.
@@ -77,7 +56,7 @@ int main()
 	So we add the .pk3 file to our irr::io::IFileSystem. After it was added,
 	we can read from the files in that archive as if they were stored on disk.
 	*/
-	device->getFileSystem()->addFileArchive(getExampleMediaPath() + "map-20kdm2.pk3");
+	device->getFileSystem()->addFileArchive("media/map-20kdm2.pk3");
 
 	/*
 	Now we can load the mesh by calling	irr::scene::ISceneManager::getMesh(). 
@@ -147,6 +126,14 @@ int main()
 	active.
 	*/
 	int lastFPS = -1;
+	IGUIEnvironment* guienv = device->getGUIEnvironment();
+	IGUIStaticText* label = guienv->addStaticText(L"Hello World!",
+		rect<s32>(10, 10, 400, 22), true);
+	label->setDrawBackground(true);
+	label->enableOverrideColor(true);
+	label->setOverrideColor(video::SColor(255, 255, 255, 255));
+	label->setBackgroundColor(video::SColor(255, 0, 0, 0));
+
 
 	while(device->run())
 	{
@@ -154,6 +141,7 @@ int main()
 		{
 			driver->beginScene(video::ECBF_COLOR | video::ECBF_DEPTH, video::SColor(255,200,200,200));
 			smgr->drawAll();
+			guienv->drawAll();
 			driver->endScene();
 
 			int fps = driver->getFPS();
@@ -166,6 +154,7 @@ int main()
 				str += fps;
 
 				device->setWindowCaption(str.c_str());
+				label->setText(str.c_str());
 				lastFPS = fps;
 			}
 		}
