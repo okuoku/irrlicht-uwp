@@ -11,6 +11,7 @@ set(SDL2_CMAKE "sdl2-static-cmake")
 set(ANGLE_CMAKE "angle-static-cmake")
 set(IRRLICHT_CMAKE "irrlicht-cmake")
 
+#set(ANGLE_BUILD_ES1 ON)
 add_subdirectory(${ANGLE_CMAKE} angle)
 
 # Headers required for User
@@ -60,6 +61,7 @@ set(asset_root ${IRRLICHT_ROOT}/media)
 
 message(STATUS "FIXME: Collecting assets using GLOB")
 file(GLOB assets 
+    # Demo Assets
     ${asset_root}/*.b3d
     ${asset_root}/*.irr
     ${asset_root}/*.jpg
@@ -69,12 +71,20 @@ file(GLOB assets
     ${asset_root}/*.md2
     ${asset_root}/*.pk3)
 
-set_property(SOURCE ${assets} PROPERTY VS_DEPLOYMENT_CONTENT 1) 
+file(GLOB shaders
+    # GLES2 Shaders
+    ${asset_root}/Shaders/*.fsh
+    ${asset_root}/Shaders/*.vsh
+
+    )
+
+set_property(SOURCE ${assets} ${shaders} PROPERTY VS_DEPLOYMENT_CONTENT 1) 
 set_property(SOURCE ${assets} PROPERTY VS_DEPLOYMENT_LOCATION "media")
+set_property(SOURCE ${shaders} PROPERTY VS_DEPLOYMENT_LOCATION "media/Shaders")
 
 add_executable(hello WIN32 main.cpp
     # Include assets
-    ${assets}
+    ${assets} ${shaders}
     # Use of static library is not recommended on UWP
     $<TARGET_OBJECTS:sdl2_static>
     $<TARGET_OBJECTS:sdl2_main_static>

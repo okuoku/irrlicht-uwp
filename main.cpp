@@ -55,8 +55,12 @@ extern "C" int SDL_main(int ac, char** av)
 
 	MyEventReceiver theEventReceiver;
 
+	//	video::E_DRIVER_TYPE myvideo = video::EDT_BURNINGSVIDEO;
+	video::E_DRIVER_TYPE myvideo = video::EDT_OGLES2;
+
+
 	IrrlichtDevice *device =
-		createDevice(video::EDT_BURNINGSVIDEO, core::dimension2d<u32>(640, 480),
+		createDevice(myvideo, core::dimension2d<u32>(640, 480),
 		32, false, false, false, &theEventReceiver);
 
 	if (device == 0)
