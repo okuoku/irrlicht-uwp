@@ -32,15 +32,38 @@ using namespace irr;
 using namespace gui;
 using namespace core;
 
+// Joystick event receiver
+class MyEventReceiver : public IEventReceiver
+{
+public:
+	SEvent::SJoystickEvent current;
+	bool isValid = false;
+	virtual bool OnEvent(const SEvent &ev)
+	{
+		if (ev.EventType == irr::EET_JOYSTICK_INPUT_EVENT)
+		{
+			current = ev.JoystickEvent;
+			isValid = true;
+		}
+		return false;
+	}
+};
+
 extern "C" int SDL_main(int ac, char** av)
 {
 	// create device and exit if creation failed
 
+	MyEventReceiver theEventReceiver;
+
 	IrrlichtDevice *device =
-		createDevice(video::EDT_BURNINGSVIDEO, core::dimension2d<u32>(640, 480));
+		createDevice(video::EDT_BURNINGSVIDEO, core::dimension2d<u32>(640, 480),
+		32, false, false, false, &theEventReceiver);
 
 	if (device == 0)
 		return 1; // could not create selected driver.
+
+	core::array<SJoystickInfo> ji;
+	device->activateJoysticks(ji);
 
 	/*
 	Get a pointer to the video driver and the SceneManager so that
@@ -108,13 +131,16 @@ extern "C" int SDL_main(int ac, char** av)
 	first person shooter games (FPS) and hence use
 	irr::scene::ISceneManager::addCameraSceneNodeFPS().
 	*/
-	smgr->addCameraSceneNodeFPS();
+	scene::ICameraSceneNode* cam;
+	//cam = smgr->addCameraSceneNodeFPS();
+	cam = smgr->addCameraSceneNode();
+	cam->bindTargetAndRotation(true);
 
 	/*
 	The mouse cursor needs not be visible, so we hide it via the
 	irr::IrrlichtDevice::ICursorControl.
 	*/
-	device->getCursorControl()->setVisible(false);
+	//device->getCursorControl()->setVisible(false);
 
 	/*
 	Everything is set up, so lets draw it. We also write the current
@@ -128,35 +154,55 @@ extern "C" int SDL_main(int ac, char** av)
 	int lastFPS = -1;
 	IGUIEnvironment* guienv = device->getGUIEnvironment();
 	IGUIStaticText* label = guienv->addStaticText(L"Hello World!",
-		rect<s32>(10, 10, 400, 22), true);
+		rect<s32>(10, 10, 450, 22), true);
 	label->setDrawBackground(true);
 	label->enableOverrideColor(true);
 	label->setOverrideColor(video::SColor(255, 255, 255, 255));
 	label->setBackgroundColor(video::SColor(255, 0, 0, 0));
-
+	
+	int frames = 0;
 
 	while(device->run())
 	{
 		if (device->isWindowActive())
 		{
+			frames++;
+			f32 h = -1;
+			f32 v = -1;
+
+			if (theEventReceiver.isValid)
+			{
+				h = (f32)theEventReceiver.current.Axis[SEvent::SJoystickEvent::AXIS_Y] / 32767.0f;
+				v = (f32)theEventReceiver.current.Axis[SEvent::SJoystickEvent::AXIS_X] / 32767.0f;
+
+				// Rotate camera
+				core::quaternion rot(h * 1.0f * core::PI, v * 1.0f * core::PI, 0);
+				core::vector3df newrot;
+				rot.toEuler(newrot);
+				cam->setRotation(newrot*core::RADTODEG);
+			}
+
 			driver->beginScene(video::ECBF_COLOR | video::ECBF_DEPTH, video::SColor(255,200,200,200));
 			smgr->drawAll();
 			guienv->drawAll();
 			driver->endScene();
-
 			int fps = driver->getFPS();
 
-			if (lastFPS != fps)
-			{
-				core::stringw str = L"Irrlicht Engine - Quake 3 Map example [";
-				str += driver->getName();
-				str += "] FPS:";
-				str += fps;
+			core::stringw str = L"Irrlicht Engine - Quake 3 Map example [";
+			str += driver->getName();
+			str += "] FPS:";
+			str += fps;
 
-				device->setWindowCaption(str.c_str());
-				label->setText(str.c_str());
-				lastFPS = fps;
-			}
+			str += " frame: ";
+			str += frames;
+
+			str += " h: ";
+			str += h;
+			str += " v: ";
+			str += v;
+
+			label->setText(str.c_str());
+			lastFPS = fps;
 		}
 		else
 			device->yield();
