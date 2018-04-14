@@ -54,12 +54,32 @@ add_subdirectory(${IRRLICHT_CMAKE} irrlicht)
 
 include_directories(${IRRLICHT_ROOT}/include)
 
+# Assets
+
+set(asset_root ${IRRLICHT_ROOT}/media)
+
+message(STATUS "FIXME: Collecting assets using GLOB")
+file(GLOB assets 
+    ${asset_root}/*.b3d
+    ${asset_root}/*.irr
+    ${asset_root}/*.jpg
+    ${asset_root}/*.bmp
+    ${asset_root}/*.png
+    ${asset_root}/*.mdl
+    ${asset_root}/*.md2
+    ${asset_root}/*.pk3)
+
+set_property(SOURCE ${assets} PROPERTY VS_DEPLOYMENT_CONTENT 1) 
+set_property(SOURCE ${assets} PROPERTY VS_DEPLOYMENT_LOCATION "media")
+
 add_executable(hello WIN32 main.cpp
+    # Include assets
+    ${assets}
+    # Use of static library is not recommended on UWP
     $<TARGET_OBJECTS:sdl2_static>
     $<TARGET_OBJECTS:sdl2_main_static>
     $<TARGET_OBJECTS:irrlicht_static>
-    $<TARGET_OBJECTS:angle_static>
-    )
+    $<TARGET_OBJECTS:angle_static>)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
     set(extra_libs kernel32 dxguid)
