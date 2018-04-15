@@ -1,6 +1,8 @@
 Irrlicht UWP
 ============
 
+[![demo](http://img.youtube.com/vi/OqdW7qjPlHg/0.jpg)](http://www.youtube.com/watch?v=OqdW7qjPlHg "demo")
+
 UWP port of Irrlicht game engine using ANGLE GLES2 + SDL2.
 
 This repository is for build files.
